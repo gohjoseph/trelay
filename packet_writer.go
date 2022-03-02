@@ -71,7 +71,7 @@ func (pw *PacketWriter) WriteUint64(v uint64) *PacketWriter {
 	return pw
 }
 
-func (pw *PacketWriter) PutInt64(v int64) *PacketWriter {
+func (pw *PacketWriter) WriteInt64(v int64) *PacketWriter {
 	return pw.WriteUint64(uint64(v))
 }
 

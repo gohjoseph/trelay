@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"math"
 )
 
 type Packet struct {
@@ -296,6 +297,26 @@ func (p *Packet) ReadString() (string, error) {
 // Reads and returns a string, panics if unsuccessful
 func (p *Packet) MustReadString() string {
 	v, err := p.ReadString()
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
+// Reads and returns float32, error is io.EOF if unsuccessful. Head is not advanced on error, so it is still possible to read a smaller value from packet
+func (p *Packet) ReadFloat32() (float32, error) {
+	p.ensureAccuratePointer()
+	if !p.canReadN(4) {
+		return 0, io.EOF
+	}
+	v := binary.LittleEndian.Uint32(p.buf[p.ptr : p.ptr+4])
+	p.ptr += 4
+	return math.Float32frombits(v), nil
+}
+
+// Reads and returns a float32, panics if unsuccessful
+func (p *Packet) MustReadFloat32() float32 {
+	v, err := p.ReadFloat32()
 	if err != nil {
 		panic(err)
 	}
