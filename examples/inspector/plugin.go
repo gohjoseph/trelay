@@ -70,6 +70,7 @@ func (*plugin) OnServerPacket(ctx *trelay.PacketContext) {
 		str += handleModifyTile(ctx, false)
 	case trelay.UpdateItemDrop:
 		str += handleUpdateItemDrop(ctx, false)
+		// Reduce log spam from UpdateItemDrop packets
 		if str == "Server " {
 			return
 		}
@@ -96,6 +97,7 @@ func handleUpdateItemDrop(ctx *trelay.PacketContext, client bool) string {
 	noDelay := pkt.MustReadByte()
 	netItemID := pkt.MustReadInt16()
 
+	// Reduce log spam from UpdateItemDrop packets
 	if stackSize == 0 {
 		return ""
 	}
@@ -178,12 +180,6 @@ func handleModifyTile(ctx *trelay.PacketContext, client bool) string {
 	flag1 := pkt.MustReadInt16()
 	flag2 := pkt.MustReadByte()
 
-	if client {
-		if action == KillTile {
-
-		}
-	}
-
 	return fmt.Sprintf("ModifyTile action: %s (%d, %d) flags: %d %d\n", action.String(), x, y, flag1, flag2)
 }
 
@@ -192,23 +188,8 @@ func handleConnectRequest(ctx *trelay.PacketContext, client bool) string {
 	pkt := ctx.Packet()
 	ver := pkt.MustReadString()
 
-	writer := trelay.PacketWriter{}
-	writer.SetType(pkt.Type())
-	// if ver == "Terraria248" {
-	// 	ver = "Terraria247"
-	// }
-	writer.WriteString(ver)
-
-	ctx.Session().Server.Write(writer.Packet())
-	ctx.SetHandled()
 	return fmt.Sprintln("ConnectRequest", ver)
 }
-
-// func printPacket(ctx *trelay.PacketContext) {
-// 	pkt := ctx.Packet()
-// 	fmt.Println("packet", pkt.String())
-// 	fmt.Println("packet", hex.EncodeToString(pkt.MustReadBytes(pkt.Length()-3)))
-// }
 
 type ModifyTileAction byte
 
